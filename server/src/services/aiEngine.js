@@ -156,11 +156,16 @@ SCHEMA:
  */
 export const generateLessonContent = async (lessonTitle, sourceChunks) => {
   const systemPrompt = `
-    You are an expert curriculum writer. You are writing a single lesson for a course.
+    You are an expert curriculum writer, an expert educator. You are writing a single lesson for a course.
     
     CRITICAL RULE: You must base your entire lesson ONLY on the provided Source Text. 
-    Do not add external facts, historical dates, or examples unless they are explicitly 
+    You can verified and trusted  external facts, historical dates, or examples unless they are explicitly 
     mentioned in the Source Text. If the source text is brief, make the lesson brief.
+    Create a lesson of atleast 200 words, but do not invent content. If the source text is brief, make the lesson brief.
+    Make a lesson that is clear, structured, and easy to understand. Use headings, bullet points, and examples where appropriate.
+    OUTPUT FORMAT: You must output the lesson content in the following JSON structure. 
+    All fields must be filled with specific content derived from the source text. 
+    Do not leave any field empty or use generic placeholders.
 
     OUTPUT SCHEMA (Must be valid JSON):
     {
@@ -169,6 +174,21 @@ export const generateLessonContent = async (lessonTitle, sourceChunks) => {
       "importantNotes": ["String (Warnings, caveats, or edge cases mentioned in the text)"],
       "realWorldExamples": ["String (Concrete examples mentioned in the text)"],
       "summary": "String (2-3 concluding sentences)"
+      "quizData": {
+    "passingScore": 66,
+    "questions": [
+      {
+        "question": "What is the main concept of...?",
+        "options": ["Option A", "Option B", "Option C", "Option D"],
+        "correctAnswerIndex": 1,
+        "explanation": "Option B is correct because..."
+      },
+      // ... generate 0-2 more questions based on leangth of course
+      // Ensure questions are directly answerable from the source text and do not require external knowledge.
+      // if the source text is brief, generate fewer questions. If the source text is long, generate more questions.
+    ]
+  }
+    inshort, your task is to create a comprehensive lesson that is fully grounded in the provided source text, ensuring clarity, accuracy,  educational value and a quiz.
     }
   `;
 
@@ -233,6 +253,7 @@ export const processLessonsInParallel = async (courseDoc, concurrencyLimit = 2) 
           [`chapters.${task.chIdx}.topics.${task.topIdx}.lessons.${task.lesIdx}.importantNotes`]: content.importantNotes,
           [`chapters.${task.chIdx}.topics.${task.topIdx}.lessons.${task.lesIdx}.realWorldExamples`]: content.realWorldExamples,
           [`chapters.${task.chIdx}.topics.${task.topIdx}.lessons.${task.lesIdx}.summary`]: content.summary,
+          [`chapters.${task.chIdx}.topics.${task.topIdx}.lessons.${task.lesIdx}.quizData`]: content.quizData,
           [`chapters.${task.chIdx}.topics.${task.topIdx}.lessons.${task.lesIdx}.generationStatus`]: 'completed'
         }
       }

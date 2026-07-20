@@ -1,15 +1,12 @@
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { getS3Client, generateUploadURL, streamToBuffer } from '../utils/s3.js';
 import { Course } from '../models/Course.js';
-<<<<<<< HEAD
-=======
 import { UserProgress } from '../models/UserProgress.js';
 import {UserStats} from '../models/UserStats.js';
->>>>>>> 453d276 (Initial clean commit)
 import crypto from 'crypto';
 import PDFParser from 'pdf2json';
 import { chunkText, generateCourseSkeleton , processLessonsInParallel} from '../services/aiEngine.js';
-
+import {User} from '../models/User.js';
 // Helper to safely decode text that might contain stray '%' symbols
 const safeDecodeURI = (encodedStr) => {
   try {
@@ -17,6 +14,25 @@ const safeDecodeURI = (encodedStr) => {
   } catch (e) {
     // If a raw '%' exists (e.g., "100%"), manually decode valid sequences and ignore the rest
     return encodedStr.replace(/(%[0-9A-F]{2})+/gi, decodeURIComponent);
+  }
+};
+
+// Add this to your imports: import { User } from '../models/User.js'; (Make sure User model is imported)
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.name = name || user.name;
+    user.email = email || user.email;
+    await user.save();
+
+    res.status(200).json({ status: 'success', data: user });
+  } catch (error) {
+    res.status(500).json({ message: 'Update failed' });
   }
 };
 
@@ -203,12 +219,14 @@ const findLessonById = (course, lessonId) => {
 export const submitQuiz = async (req, res) => {
   try {
     const { courseId, lessonId, answers } = req.body;
+    const userId = req.user._id;
+    const today = new Date().toISOString().split('T')[0];
     const course = await Course.findById(courseId);
     
-    // Use the helper
+    // 1. Find and validate lesson
     const targetLesson = findLessonById(course, lessonId);
-    
     if (!targetLesson) return res.status(404).json({ message: "Lesson not found" });
+
     // 2. Calculate score
     let correctCount = 0;
     targetLesson.quizData.questions.forEach((q, i) => {
@@ -220,7 +238,7 @@ export const submitQuiz = async (req, res) => {
 
     // 3. Update Progress DB
     await UserProgress.findOneAndUpdate(
-      { userId: req.user._id, courseId: req.body.courseId },
+      { userId, courseId },
       { 
         $push: { quizResults: { lessonId, score, passed } },
         $addToSet: { completedLessons: passed ? lessonId : [] }
@@ -228,16 +246,41 @@ export const submitQuiz = async (req, res) => {
       { upsert: true }
     );
 
-    res.status(200).json({ passed, score, correctAnswers: targetLesson.quizData.questions.map(q => q.correctAnswerIndex) });
+    // 4. IF PASSED: Update Streak & Activity Log (The Missing Link)
+    if (passed) {
+      let stats = await UserStats.findOne({ userId });
+      if (!stats) {
+        stats = new UserStats({ userId, currentStreak: 1, lastActiveDate: today });
+        stats.activityLog.push({ date: today, lessonsCompleted: 1 });
+      } else {
+        const lastDate = new Date(stats.lastActiveDate);
+        const currentDate = new Date(today);
+        const diffDays = Math.floor((currentDate - lastDate) / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 1) stats.currentStreak += 1;
+        else if (diffDays > 1) stats.currentStreak = 1;
+        
+        stats.lastActiveDate = today;
+        if (stats.currentStreak > stats.highestStreak) stats.highestStreak = stats.currentStreak;
+
+        const todayLog = stats.activityLog.find(log => log.date === today);
+        if (todayLog) todayLog.lessonsCompleted += 1;
+        else stats.activityLog.push({ date: today, lessonsCompleted: 1 });
+      }
+      await stats.save();
+    }
+
+    res.status(200).json({ 
+      passed, 
+      score, 
+      correctAnswers: targetLesson.quizData.questions.map(q => q.correctAnswerIndex) 
+    });
   } catch (error) {
+    console.error("Quiz processing error:", error);
     res.status(500).json({ message: "Quiz processing failed" });
   }
 };
 
-<<<<<<< HEAD
-/**
- * @desc    Get all courses for the logged-in user
-=======
 // /**
 //  * @desc    Get all courses for the logged-in user
 //  * @route   GET /api/courses/my-courses
@@ -254,24 +297,17 @@ export const submitQuiz = async (req, res) => {
 // server/src/controllers/courseController.js
 /**
  * @desc    Get all courses for the logged-in user with progress attached
->>>>>>> 453d276 (Initial clean commit)
  * @route   GET /api/courses/my-courses
  */
 export const getUserCourses = async (req, res) => {
   try {
-<<<<<<< HEAD
-    const courses = await Course.find({ userId: req.user._id }).sort({ createdAt: -1 });
-    res.status(200).json({ status: 'success', data: courses });
-  } catch (error) {
-    res.status(500).json({ status: 'error', message: 'Failed to fetch library.' });
-  }
-=======
     // 1. Fetch all courses generated by this user
     const courses = await Course.find({ userId: req.user._id }).sort({ createdAt: -1 });
     
     // 2. Fetch all progress records for this user
     const progresses = await UserProgress.find({ userId: req.user._id });
 
+    // 3. Map over courses to calculate and attach progress
     // 3. Map over courses to calculate and attach progress
     const coursesWithProgress = courses.map(course => {
       let totalLessons = 0;
@@ -283,14 +319,12 @@ export const getUserCourses = async (req, res) => {
         });
       });
 
-      // Find the matching progress document
-      const userProgress = progresses.find(p => p.courseId.toString() === course._id.toString());
-      const completedCount = userProgress ? userProgress.completedLessons.length : 0;
+      // CRITICAL FIX: Added "p.courseId &&" to prevent null reference crashes
+      const userProgress = progresses.find(p => p.courseId && p.courseId.toString() === course._id.toString());
       
-      // Calculate percentage (avoid division by zero)
+      const completedCount = userProgress ? userProgress.completedLessons.length : 0;
       const progressPercentage = totalLessons === 0 ? 0 : Math.round((completedCount / totalLessons) * 100);
 
-      // Return combined object
       return {
         ...course.toObject(),
         progressPercentage,
@@ -422,5 +456,46 @@ export const getCourseProgress = async (req, res) => {
     console.error("Get Progress Error:", error);
     res.status(500).json({ message: 'Failed to fetch progress' });
   }
->>>>>>> 453d276 (Initial clean commit)
+};
+
+// --- ANALYTICS ENGINE ---
+export const getAnalytics = async (req, res) => {
+  try {
+    const stats = await UserStats.findOne({ userId: req.user._id });
+    const progress = await UserProgress.find({ userId: req.user._id });
+    
+    // Calculate totals across all courses
+    let totalTimeSeconds = 0;
+    let totalLessons = 0;
+    
+    progress.forEach(p => {
+       totalTimeSeconds += p.timeSpentSeconds || 0;
+       totalLessons += p.completedLessons.length || 0;
+    });
+
+    // Calculate current month's specific data
+    let monthlyLessons = 0;
+    const currentMonth = new Date().toISOString().slice(0, 7); // Gets 'YYYY-MM'
+    
+    if (stats && stats.activityLog) {
+       stats.activityLog.forEach(log => {
+         if (log.date.startsWith(currentMonth)) {
+           monthlyLessons += log.lessonsCompleted || 0;
+         }
+       });
+    }
+
+    res.status(200).json({
+      currentStreak: stats?.currentStreak || 0,
+      highestStreak: stats?.highestStreak || 0,
+      monthlyLessons,
+      totalLessons,
+      totalTimeMinutes: Math.round(totalTimeSeconds / 60),
+      activityLog: stats?.activityLog || []
+    });
+
+  } catch (error) {
+    console.error("Analytics Error:", error);
+    res.status(500).json({ message: 'Failed to fetch analytics' });
+  }
 };

@@ -1,47 +1,39 @@
 import express from 'express';
-<<<<<<< HEAD
-import { getPresignedUrl, processUploadedPDF, startLessonGeneration, getCourseById, getUserCourses } from '../controllers/courseController.js';
-=======
 import { 
-  getPresignedUrl, 
-  processUploadedPDF, 
-  startLessonGeneration, 
-  getCourseById, 
-  getUserCourses, 
-  getNote, 
-  saveNote,
-  markLessonComplete,
-  getCourseProgress,
-  submitQuiz
+  getPresignedUrl, processUploadedPDF, startLessonGeneration, 
+  getCourseById, getUserCourses, getNote, saveNote, markLessonComplete,
+  getCourseProgress, submitQuiz, getAnalytics, updateProfile
 } from '../controllers/courseController.js';
->>>>>>> 453d276 (Initial clean commit)
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.use(protect); 
 
-<<<<<<< HEAD
+// ==========================================
+//  SPECIFIC ROUTES (Must go FIRST)
+// ==========================================
 router.post('/upload-url', getPresignedUrl);
 router.post('/process-pdf', processUploadedPDF);
-router.post('/:id/generate-lessons', startLessonGeneration);
-router.get('/:id', getCourseById);
-router.get('/my-courses', getUserCourses);
-=======
-// --- SPECIFIC ROUTES (Must go above /:id) ---
-router.post('/upload-url', getPresignedUrl);
-router.post('/process-pdf', processUploadedPDF);
-router.get('/my-courses', getUserCourses);
+router.put('/profile', updateProfile);
+
+router.get('/my-courses', getUserCourses); 
 
 router.post('/mark-complete', markLessonComplete); 
 router.get('/notes/:courseId/:lessonId', getNote);
 router.post('/notes', saveNote); 
-router.get('/progress/:courseId', getCourseProgress); 
+router.get('/progress/:courseId', getCourseProgress);
+router.post('/submit-quiz', submitQuiz);
 
-// --- DYNAMIC ROUTES (Must go at the bottom) ---
+// ==========================================
+//  ANALYTICS ROUTES
+// ==========================================
+router.get('/analytics', getAnalytics); 
+
+// ==========================================
+//  DYNAMIC ROUTES (Must go LAST)
+// ==========================================
 router.get('/:id', getCourseById);
 router.post('/:id/generate-lessons', startLessonGeneration);
-router.post('/:id/submit-quiz', submitQuiz);
 
->>>>>>> 453d276 (Initial clean commit)
-export default router;
+export default router; 

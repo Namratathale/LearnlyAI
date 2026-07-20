@@ -1,77 +1,4 @@
 "use client";
-<<<<<<< HEAD
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  CheckCircle, Circle, Lock, MessageSquare, PlayCircle, 
-  Menu, X, Sun, Moon, Award 
-} from "lucide-react";
-import confetti from 'canvas-confetti';
-
-export default function CoursePlayer({ course }) {
-  const [currentLesson, setCurrentLesson] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
-  const [toast, setToast] = useState(null);
-
-  // Trigger feedback message
-  const triggerToast = (msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
-  };
-
-  return (
-    <div className={`h-screen flex overflow-hidden ${darkMode ? 'dark' : ''}`}>
-      {/* Dark mode wrapper */}
-      <div className="flex w-full h-full bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
-        
-        {/* SIDEBAR DRAWER */}
-        <motion.aside 
-          initial={{ width: 320 }}
-          animate={{ width: sidebarOpen ? 320 : 0 }}
-          className="border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl z-20 overflow-hidden"
-        >
-          <div className="bg-white/10 dark:bg-slate-800/40 backdrop-blur-lg border border-white/20 p-4 rounded-2xl mt-auto">
-            <h3 className="font-bold text-white mb-2">Zoiee Tutor</h3>
-            <p className="text-xs text-white/70">I am analyzing your progress. Keep going!</p>
-          </div>
-          <div className="p-6 h-full overflow-y-auto">
-            <h2 className="font-bold text-slate-800 dark:text-white text-lg mb-6 truncate">{course.title}</h2>
-            {course.chapters.map((ch, idx) => (
-              <div key={idx} className="mb-8">
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Module {idx + 1}</h4>
-                {ch.topics.map(top => (
-                   <div key={top.title} className="mb-2">
-                     <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">{top.title}</p>
-                     {top.lessons.map(les => (
-                       <button 
-                         key={les._id}
-                         onClick={() => setCurrentLesson(les)}
-                         className="w-full flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 text-sm transition-all"
-                       >
-                         <Circle size={14} className="text-slate-300 dark:text-slate-600" />
-                         <span className="text-slate-600 dark:text-slate-400">{les.title}</span>
-                       </button>
-                     ))}
-                   </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        </motion.aside>
-
-        {/* MAIN CONTENT */}
-        <main className="flex-1 relative flex flex-col h-full overflow-y-auto">
-          {/* Top Bar */}
-          <header className="px-8 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-md">
-             <button onClick={() => setSidebarOpen(!sidebarOpen)}><Menu /></button>
-             <button onClick={() => setDarkMode(!darkMode)}>
-               {darkMode ? <Sun size={20}/> : <Moon size={20}/>}
-             </button>
-          </header>
-
-          <div className="p-8 md:p-16 max-w-4xl mx-auto">
-=======
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -257,16 +184,15 @@ useEffect(() => {
   };
 
   return (
-    <div className={`h-screen flex overflow-hidden bg-background dark:bg-slate-950 transition-colors duration-500 font-sans ${darkMode ? 'dark' : ''}`}>
+    <div className={`h-screen flex overflow-hidden bg-background dark:bg-slate-900 transition-colors duration-500 font-sans ${darkMode ? 'dark' : ''}`}>
       
       {/* 1. SIDEBAR (Curriculum Drawer) */}
       <motion.aside 
         initial={{ width: 320 }}
         animate={{ width: sidebarOpen ? 320 : 0 }}
-        className="border-r border-surface-light dark:border-slate-800 bg-surface dark:bg-slate-900 shadow-2xl z-30 flex flex-col overflow-hidden shrink-0"
+        className="border-r border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xl z-30 flex flex-col overflow-hidden shrink-0"
       >
-        <div className="p-6 border-b border-surface-light dark:border-slate-800 bg-surface dark:bg-slate-900 sticky top-0 z-10">
-          <button 
+        <div className="p-6 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 sticky top-0 z-10">          <button 
             onClick={() => router.push('/my-courses')}
             className="flex items-center gap-2 text-sm font-bold text-text-muted dark:text-slate-400 hover:text-primary dark:hover:text-blue-400 transition-colors mb-4"
           >
@@ -332,7 +258,7 @@ useEffect(() => {
       </motion.aside>
 
       {/* 2. MAIN LEARNING CANVAS */}
-      <main className="flex-1 relative flex flex-col h-full overflow-hidden bg-slate-50/50 dark:bg-slate-950">
+      <main className="flex-1 relative flex flex-col h-full overflow-hidden bg-slate-50 dark:bg-slate-900">
         
         {/* Header Actions */}
         {/* Header Actions */}
@@ -365,38 +291,10 @@ useEffect(() => {
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-8 md:p-16 pt-24 pb-32">
           <div className="max-w-3xl mx-auto">
->>>>>>> 453d276 (Initial clean commit)
             <AnimatePresence mode="wait">
               {currentLesson ? (
                 <motion.div 
                   key={currentLesson._id}
-<<<<<<< HEAD
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                >
-                  <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white mb-8">{currentLesson.title}</h1>
-                  <div className="prose prose-lg dark:prose-invert">
-                    {currentLesson.explanation}
-                  </div>
-                  
-                  <motion.button 
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="mt-12 w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-lg shadow-lg shadow-blue-600/20"
-                    onClick={() => {
-                      triggerToast("Well done! You've mastered this lesson.");
-                      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                    }}
-                  >
-                    Mark as Complete
-                  </motion.button>
-                </motion.div>
-              ) : (
-                <div className="text-center pt-20">
-                  <PlayCircle size={80} className="mx-auto text-slate-300 mb-6" />
-                  <h2 className="text-2xl font-bold text-slate-600">Select a lesson to begin your journey</h2>
-=======
                   initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
                   animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                   exit={{ opacity: 0, y: -30, filter: "blur(10px)" }}
@@ -411,133 +309,137 @@ useEffect(() => {
                   </h1>
                   
                   {/* Dynamic Lesson Content: Quiz vs Standard Text */}
-{(currentLesson.type === 'quiz' || (currentLesson.quizData && currentLesson.quizData.questions?.length > 0)) ? (
-  
-  /* ====================== QUIZ UI ====================== */
-  <div className="space-y-10 mb-12">
-    {!quizResult ? (
-      /* Active Quiz View */
-      <div className="space-y-12">
-        {currentLesson.quizData.questions.map((q, qIndex) => (
-          <div key={qIndex} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-sm">
-            <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-6">
-              <span className="text-blue-500 mr-2">{qIndex + 1}.</span> {q.question}
-            </h3>
-            <div className="space-y-3">
-              {q.options.map((opt, optIndex) => (
-                <button
-                  key={optIndex}
-                  onClick={() => setQuizAnswers(prev => ({ ...prev, [qIndex]: optIndex }))}
-                  className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center gap-3
-                    ${quizAnswers[qIndex] === optIndex 
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 shadow-sm' 
-                      : 'border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-slate-600 dark:text-slate-400 hover:border-blue-300 dark:hover:border-blue-700'
-                    }`}
-                >
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0
-                    ${quizAnswers[qIndex] === optIndex ? 'border-blue-500' : 'border-slate-300 dark:border-slate-600'}`}>
-                    {quizAnswers[qIndex] === optIndex && <div className="w-2.5 h-2.5 bg-blue-500 rounded-full" />}
+                  {/* ====================== 1. STANDARD CONTENT UI ====================== */}
+                  <div className="prose prose-lg dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 leading-relaxed mb-12">
+                    <p>{currentLesson.explanation}</p>
+                    
+                    {/* Placeholder for AI Generated Diagram */}
+                    <div className="my-10 w-full h-72 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 rounded-3xl border border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center relative overflow-hidden group">
+                      <div className="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors"></div>
+                      <Sparkles size={32} className="text-slate-400 mb-3 opacity-50" />
+                      <span className="text-slate-500 font-medium">AI Generated Diagram: {currentLesson.title}</span>
+                    </div>
                   </div>
-                  {opt}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
 
-        <motion.button 
-          whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-          onClick={handleQuizSubmit}
-          disabled={isSubmittingQuiz || Object.keys(quizAnswers).length !== currentLesson.quizData.questions.length}
-          className="w-full py-4 rounded-2xl font-bold text-lg bg-blue-600 text-white shadow-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
-        >
-          {isSubmittingQuiz ? <Loader2 className="animate-spin" size={24} /> : <CheckCircle size={24} />}
-          Submit Final Answers
-        </motion.button>
-      </div>
-    ) : (
-      /* Results View */
-      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-10 text-center shadow-xl">
-        <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-6 shadow-inner border-4 ${quizResult.passed ? 'bg-emerald-50 border-emerald-100 text-emerald-500 dark:bg-emerald-900/20 dark:border-emerald-800' : 'bg-red-50 border-red-100 text-red-500 dark:bg-red-900/20 dark:border-red-800'}`}>
-          {quizResult.passed ? <Award size={48} /> : <X size={48} />}
-        </div>
-        
-        <h2 className="text-3xl font-heading font-bold text-slate-800 dark:text-white mb-2">
-          {quizResult.passed ? "Assessment Passed!" : "Needs Review"}
-        </h2>
-        <p className="text-slate-500 dark:text-slate-400 mb-8">
-          You scored <strong className={`text-xl ${quizResult.passed ? 'text-emerald-500' : 'text-red-500'}`}>{quizResult.score}%</strong> (Required: {currentLesson.quizData.passingScore}%)
-        </p>
+                  {/* ====================== 2. KNOWLEDGE CHECK (QUIZ UI) ====================== */}
+                  {(currentLesson.type === 'quiz' || (currentLesson.quizData && currentLesson.quizData.questions?.length > 0)) ? (
+                    <div className="space-y-8 mb-12 border-t border-slate-200 dark:border-slate-800 pt-10">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                          <Award size={20} />
+                        </div>
+                        <h2 className="text-2xl font-bold font-heading text-slate-800 dark:text-white">
+                          Knowledge Check
+                        </h2>
+                      </div>
+                      
+                      {!quizResult ? (
+                        /* Active Quiz View */
+                        <div className="space-y-12">
+                          {currentLesson.quizData.questions.map((q, qIndex) => (
+                            <div key={qIndex} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-sm">
+                              <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-6">
+                                <span className="text-blue-500 mr-2">{qIndex + 1}.</span> {q.question}
+                              </h3>
+                              <div className="space-y-3">
+                                {q.options.map((opt, optIndex) => (
+                                  <button
+                                    key={optIndex}
+                                    onClick={() => setQuizAnswers(prev => ({ ...prev, [qIndex]: optIndex }))}
+                                    className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center gap-3
+                                      ${quizAnswers[qIndex] === optIndex 
+                                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 shadow-sm' 
+                                        : 'border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-slate-600 dark:text-slate-400 hover:border-blue-300 dark:hover:border-blue-700'
+                                      }`}
+                                  >
+                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0
+                                      ${quizAnswers[qIndex] === optIndex ? 'border-blue-500' : 'border-slate-300 dark:border-slate-600'}`}>
+                                      {quizAnswers[qIndex] === optIndex && <div className="w-2.5 h-2.5 bg-blue-500 rounded-full" />}
+                                    </div>
+                                    {opt}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
 
-        {/* Show correct answers if failed, or let them advance if passed */}
-        {quizResult.passed ? (
-          <button 
-            onClick={() => {
-              const currentIndex = linearLessons.findIndex(l => l._id === currentLesson._id);
-              if (currentIndex < linearLessons.length - 1) setCurrentLesson(linearLessons[currentIndex + 1]);
-            }}
-            className="w-full py-4 rounded-2xl font-bold text-lg bg-emerald-600 text-white shadow-lg hover:bg-emerald-700 transition-colors"
-          >
-            Continue to Next Lesson
-          </button>
-        ) : (
-          <div className="space-y-6 text-left border-t border-slate-100 dark:border-slate-800 pt-8 mt-8">
-            <h4 className="font-bold text-slate-700 dark:text-slate-300">Review your answers:</h4>
-            {currentLesson.quizData.questions.map((q, idx) => (
-              <div key={idx} className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl text-sm border border-slate-200 dark:border-slate-700">
-                <p className="font-bold mb-2 text-slate-800 dark:text-slate-200">{q.question}</p>
-                <p className="text-emerald-600 dark:text-emerald-400"><span className="font-bold">Correct:</span> {q.options[quizResult.correctAnswers[idx]]}</p>
-                {quizAnswers[idx] !== quizResult.correctAnswers[idx] && (
-                  <p className="text-red-500 mt-1"><span className="font-bold">You selected:</span> {q.options[quizAnswers[idx]]}</p>
-                )}
-              </div>
-            ))}
-            <button 
-              onClick={() => { setQuizResult(null); setQuizAnswers({}); }}
-              className="w-full py-4 mt-6 rounded-2xl font-bold text-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-lg transition-transform active:scale-95"
-            >
-              Retake Assessment
-            </button>
-          </div>
-        )}
-      </motion.div>
-    )}
-  </div>
+                          <motion.button 
+                            whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                            onClick={handleQuizSubmit}
+                            disabled={isSubmittingQuiz || Object.keys(quizAnswers).length !== currentLesson.quizData.questions.length}
+                            className="w-full py-4 rounded-2xl font-bold text-lg bg-blue-600 text-white shadow-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
+                          >
+                            {isSubmittingQuiz ? <Loader2 className="animate-spin" size={24} /> : <CheckCircle size={24} />}
+                            Submit Final Answers
+                          </motion.button>
+                        </div>
+                      ) : (
+                        /* Results View */
+                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-10 text-center shadow-xl">
+                          <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-6 shadow-inner border-4 ${quizResult.passed ? 'bg-emerald-50 border-emerald-100 text-emerald-500 dark:bg-emerald-900/20 dark:border-emerald-800' : 'bg-red-50 border-red-100 text-red-500 dark:bg-red-900/20 dark:border-red-800'}`}>
+                            {quizResult.passed ? <Award size={48} /> : <X size={48} />}
+                          </div>
+                          
+                          <h2 className="text-3xl font-heading font-bold text-slate-800 dark:text-white mb-2">
+                            {quizResult.passed ? "Assessment Passed!" : "Needs Review"}
+                          </h2>
+                          <p className="text-slate-500 dark:text-slate-400 mb-8">
+                            You scored <strong className={`text-xl ${quizResult.passed ? 'text-emerald-500' : 'text-red-500'}`}>{quizResult.score}%</strong> (Required: {currentLesson.quizData.passingScore}%)
+                          </p>
 
-) : (
-  
-  /* ====================== STANDARD CONTENT UI ====================== */
-  <>
-    <div className="prose prose-lg dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 leading-relaxed mb-12">
-      <p>{currentLesson.explanation}</p>
-      
-      {/* Placeholder for AI Generated Diagram */}
-      <div className="my-10 w-full h-72 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 rounded-3xl border border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center relative overflow-hidden group">
-        <div className="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors"></div>
-        <Sparkles size={32} className="text-slate-400 mb-3 opacity-50" />
-        <span className="text-slate-500 font-medium">AI Generated Diagram: {currentLesson.title}</span>
-      </div>
-    </div>
-    
-    <motion.button 
-      whileHover={{ scale: 1.02, y: -2 }}
-      whileTap={{ scale: 0.98 }}
-      disabled={loading || progress.completedLessons.includes(currentLesson._id)}
-      className={`w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all shadow-xl
-        ${progress.completedLessons.includes(currentLesson._id) 
-          ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 shadow-none' 
-          : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:shadow-slate-900/20 dark:hover:shadow-white/20'
-        }`}
-      onClick={handleMarkComplete}
-    >
-      {progress.completedLessons.includes(currentLesson._id) ? (
-        <><CheckCircle size={24} /> Lesson Completed</>
-      ) : (
-        <><Award size={24} /> Mark as Complete & Next</>
-      )}
-    </motion.button>
-  </>
-)}
+                          {quizResult.passed ? (
+                            <button 
+                              onClick={() => {
+                                const currentIndex = linearLessons.findIndex(l => l._id === currentLesson._id);
+                                if (currentIndex < linearLessons.length - 1) setCurrentLesson(linearLessons[currentIndex + 1]);
+                              }}
+                              className="w-full py-4 rounded-2xl font-bold text-lg bg-emerald-600 text-white shadow-lg hover:bg-emerald-700 transition-colors"
+                            >
+                              Continue to Next Lesson
+                            </button>
+                          ) : (
+                            <div className="space-y-6 text-left border-t border-slate-100 dark:border-slate-800 pt-8 mt-8">
+                              <h4 className="font-bold text-slate-700 dark:text-slate-300">Review your answers:</h4>
+                              {currentLesson.quizData.questions.map((q, idx) => (
+                                <div key={idx} className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl text-sm border border-slate-200 dark:border-slate-700">
+                                  <p className="font-bold mb-2 text-slate-800 dark:text-slate-200">{q.question}</p>
+                                  <p className="text-emerald-600 dark:text-emerald-400"><span className="font-bold">Correct:</span> {q.options[quizResult.correctAnswers[idx]]}</p>
+                                  {quizAnswers[idx] !== quizResult.correctAnswers[idx] && (
+                                    <p className="text-red-500 mt-1"><span className="font-bold">You selected:</span> {q.options[quizAnswers[idx]]}</p>
+                                  )}
+                                </div>
+                              ))}
+                              <button 
+                                onClick={() => { setQuizResult(null); setQuizAnswers({}); }}
+                                className="w-full py-4 mt-6 rounded-2xl font-bold text-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-lg transition-transform active:scale-95"
+                              >
+                                Retake Assessment
+                              </button>
+                            </div>
+                          )}
+                        </motion.div>
+                      )}
+                    </div>
+                  ) : (
+                    /* ====================== 3. STANDARD MARK COMPLETE BUTTON (If no quiz exists) ====================== */
+                    <motion.button 
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      disabled={loading || progress.completedLessons.includes(currentLesson._id)}
+                      className={`w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all shadow-xl
+                        ${progress.completedLessons.includes(currentLesson._id) 
+                          ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 shadow-none' 
+                          : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:shadow-slate-900/20 dark:hover:shadow-white/20'
+                        }`}
+                      onClick={handleMarkComplete}
+                    >
+                      {progress.completedLessons.includes(currentLesson._id) ? (
+                        <><CheckCircle size={24} /> Lesson Completed</>
+                      ) : (
+                        <><Award size={24} /> Mark as Complete & Next</>
+                      )}
+                    </motion.button>
+                  )}
 
                 </motion.div>
               ) : (
@@ -551,29 +453,10 @@ useEffect(() => {
                   </motion.div>
                   <h2 className="text-2xl font-heading font-bold text-slate-800 dark:text-white mb-2">Ready to learn?</h2>
                   <p className="text-slate-500 dark:text-slate-400 max-w-md">Select a lesson from the curriculum sidebar to begin your journey.</p>
->>>>>>> 453d276 (Initial clean commit)
                 </div>
               )}
             </AnimatePresence>
           </div>
-<<<<<<< HEAD
-        </main>
-
-        {/* TOAST NOTIFICATION */}
-        <AnimatePresence>
-          {toast && (
-            <motion.div 
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 50, opacity: 0 }}
-              className="fixed bottom-8 right-8 bg-emerald-500 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 font-bold z-50"
-            >
-              <Award size={20} /> {toast.msg}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-=======
         </div>
       </main>
 
@@ -675,7 +558,6 @@ useEffect(() => {
     </motion.div>
   )}
 </AnimatePresence>
->>>>>>> 453d276 (Initial clean commit)
     </div>
   );
 }

@@ -1,16 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-<<<<<<< HEAD
-import API from "@/lib/api";
-import { BookOpen, Clock, ChevronRight } from "lucide-react";
-
-export default function MyLibrary() {
-  const [courses, setCourses] = useState([]);
-=======
 import { motion } from "framer-motion";
 import API from "@/lib/api";
-import { BookOpen, ChevronRight, ArrowLeft, PlayCircle, Clock, Sparkles } from "lucide-react";
+import { BookOpen, ChevronRight, ArrowLeft, PlayCircle, Clock, Sparkles, CheckCircle } from "lucide-react";
 
 // Animation Variants
 const containerVariants = {
@@ -29,51 +22,31 @@ const cardVariants = {
 export default function MyLibrary() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
->>>>>>> 453d276 (Initial clean commit)
   const router = useRouter();
 
   useEffect(() => {
     const fetchCourses = async () => {
-<<<<<<< HEAD
-      const { data } = await API.get('/courses/my-courses');
-      setCourses(data.data);
-=======
       try {
         const { data } = await API.get('/courses/my-courses');
-        setCourses(data.data);
+        
+        // Ensure we actually received the array before setting it
+        if (data && data.data) {
+          setCourses(data.data);
+        }
       } catch (error) {
-        console.error("Failed to fetch courses", error);
+        console.error("Failed to fetch courses:", error);
       } finally {
-        setLoading(false);
+        // This guarantees the spinner disappears even if the API fails
+        setLoading(false); 
       }
->>>>>>> 453d276 (Initial clean commit)
     };
+    
+    // Ensure the function is actually being called!
     fetchCourses();
   }, []);
 
   return (
-<<<<<<< HEAD
-    <div className="p-10 bg-slate-50 min-h-screen">
-      <h1 className="text-3xl font-bold mb-8">My Learning Library</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {courses.map(course => (
-          <div key={course._id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-lg transition-all">
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4 text-blue-600">
-              <BookOpen size={24} />
-            </div>
-            <h3 className="font-bold text-lg mb-2">{course.title}</h3>
-            <p className="text-sm text-slate-500 mb-6">{course.description}</p>
-            
-            <button 
-              onClick={() => router.push(`/course/${course._id}`)}
-              className="w-full py-2 bg-slate-900 text-white rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-slate-800"
-            >
-              Resume Learning <ChevronRight size={16} />
-            </button>
-          </div>
-        ))}
-=======
+
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6 md:p-12 transition-colors duration-500 font-sans">
       
       {/* Top Navigation Bar */}
@@ -190,7 +163,6 @@ export default function MyLibrary() {
 ))}
           </motion.div>
         )}
->>>>>>> 453d276 (Initial clean commit)
       </div>
     </div>
   );
