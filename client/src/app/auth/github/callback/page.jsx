@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import API from "@/lib/api";
 import AnimatedBackground from "@/components/AnimatedBackground";
 
+export const dynamic = "force-dynamic";
+
 export default function GitHubCallback() {
   const router = useRouter();
   const searchParams = useSearchParams();
