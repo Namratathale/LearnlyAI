@@ -1,5 +1,32 @@
 @import "tailwindcss";
 
+<<<<<<< HEAD
+=======
+@font-face {
+  font-family: 'CustomHeadingFont';
+  src: url('/fonts/CarterOne-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'CustomBody';
+  src: url('/fonts/ShareTech-Regular.ttf') format('truetype'); /* Update with your exact filename */
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  --font-heading: 'CustomHeadingFont', sans-serif;
+}
+
+/* Base text contrast fixes */
+body {
+  @apply text-slate-900 dark:text-slate-100;
+} 
+
+>>>>>>> 453d276 (Initial clean commit)
 @theme {
   /* Core Backgrounds (Light Mode) */
   --color-background: #F9FAFB; /* Very light gray for the main canvas */

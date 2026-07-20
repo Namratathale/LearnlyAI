@@ -15,6 +15,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+<<<<<<< HEAD
+=======
+import AnimatedBackground from "@/components/AnimatedBackground";
+>>>>>>> 453d276 (Initial clean commit)
 
 export default function Dashboard() {
   const router = useRouter();
@@ -99,6 +103,10 @@ export default function Dashboard() {
 
   // --- UI COMPONENTS ---
   const SidebarItem = ({ icon: Icon, label, id }) => (
+<<<<<<< HEAD
+=======
+
+>>>>>>> 453d276 (Initial clean commit)
     <button 
       onClick={() => setActiveTab(id)}
       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
@@ -115,11 +123,24 @@ export default function Dashboard() {
 
   if (!user) {
     return (
+<<<<<<< HEAD
+=======
+
+>>>>>>> 453d276 (Initial clean commit)
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 size={40} className="text-[#0891B2] animate-spin" />
       </div>
     );
   }
+<<<<<<< HEAD
+=======
+  // Add this inside your component, before the return statement
+const isFullyGenerated = extractedPreview?.chapters?.every(ch =>
+  ch.topics.every(top =>
+    top.lessons.every(les => les.generationStatus === 'completed')
+  )
+);
+>>>>>>> 453d276 (Initial clean commit)
 
   return (
     <div className="min-h-screen bg-background flex overflow-hidden font-sans text-text-main">
@@ -149,7 +170,19 @@ export default function Dashboard() {
         <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto custom-scrollbar">
           <SidebarItem icon={LayoutDashboard} label="Workspace" id="workspace" />
           <SidebarItem icon={UserCircle} label="Profile Details" id="profile" />
+<<<<<<< HEAD
           <SidebarItem icon={Library} label="My Courses" id="my-courses" />
+=======
+          {/* Replace the My Courses SidebarItem with this: */}
+          <button 
+            onClick={() => router.push('/my-courses')} 
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-text-muted hover:bg-surface-light hover:text-primary transition-colors mb-2"
+          >
+            <Library size={20} />
+            {sidebarOpen && <span className="font-medium text-sm">My Courses</span>}
+          </button>
+          {/* <SidebarItem icon={Library} label="My Courses" id="my-courses" /> */}
+>>>>>>> 453d276 (Initial clean commit)
           <SidebarItem icon={Settings} label="System Settings" id="settings" />
         </nav>
 
@@ -214,6 +247,10 @@ export default function Dashboard() {
         </header>
 
         {/* --- DYNAMIC TAB CONTENT --- */}
+<<<<<<< HEAD
+=======
+        
+>>>>>>> 453d276 (Initial clean commit)
         <main className="flex-1 overflow-y-auto p-6 sm:p-10 z-10 custom-scrollbar">
           <div className="max-w-5xl mx-auto">
             <AnimatePresence mode="wait">
@@ -351,6 +388,7 @@ export default function Dashboard() {
                         </div>
                       )}
 
+<<<<<<< HEAD
                       {/* Action Buttons */}
                       <div className="mt-8 flex justify-end gap-4 border-t border-surface-light pt-6">
                         {status !== "idle" && status !== "uploading" && status !== "processing" && status !== "generating" && (
@@ -413,6 +451,103 @@ onClick={async () => {
                           </Button>
                         )}
                       </div>
+=======
+          {/* Action Buttons */}
+          <div className="mt-8 flex justify-end gap-4 border-t border-surface-light pt-6">
+            
+            {/* Always show Start Over (unless no file is selected) */}
+            {(file || status !== "idle") && status !== "uploading" && status !== "processing" && status !== "generating" && (
+              <Button 
+                variant="outline" 
+                onClick={() => { setFile(null); setStatus("idle"); setExtractedPreview(""); }} 
+                className="h-12 px-6 rounded-xl border-surface-light hover:bg-surface-light text-text-main"
+              >
+                Start Over
+              </Button>
+            )}
+
+            {/* PHASE 1: File selected, ready to extract skeleton */}
+            {/* PHASE 1: File selected, ready to extract skeleton */}
+            {status === "idle" && file && (
+              <Button 
+                onClick={handleUploadSequence} 
+                className="h-12 px-8 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-all"
+              >
+                Analyze Document <ChevronRight size={18} className="ml-2" />
+              </Button>
+            )}
+
+            {/* PHASE 2: Currently Extracting Skeleton */}
+            {(status === "uploading" || status === "processing") && (
+              <Button disabled className="h-12 px-8 bg-blue-100 text-blue-700 font-bold rounded-xl flex items-center gap-2">
+                <Loader2 size={18} className="animate-spin" /> Analyzing Document...
+              </Button>
+            )}
+
+            {/* PHASE 3: Skeleton ready, start parallel content generation */}
+            {status === "success" && extractedPreview && !isFullyGenerated && (
+              <Button 
+                onClick={async () => {
+                  try {
+                    setStatus("generating");
+                    await startGeneration(extractedPreview._id);
+                    
+                    const interval = setInterval(async () => {
+                      try {
+                        const { data } = await getCourse(extractedPreview._id);
+                        setExtractedPreview(data.data);
+                        
+                        const allLessons = data.data.chapters.flatMap(c => c.topics.flatMap(t => t.lessons));
+                        const isFinished = allLessons.every(l => l.generationStatus === 'completed' || l.generationStatus === 'failed');
+                        const hasFailed = allLessons.some(l => l.generationStatus === 'failed');
+
+                        if (isFinished) {
+                          clearInterval(interval);
+                          setStatus("success");
+                          
+                          if (hasFailed) {
+                            setErrorMessage("Some lessons failed to generate. Check console logs.");
+                            setStatus("error");
+                          }
+                        }
+                      } catch (err) {
+                        clearInterval(interval);
+                        setStatus("error");
+                        setErrorMessage("Connection lost. Please refresh.");
+                      }
+                    }, 3000);
+                    
+                  } catch (err) {
+                    console.error("AXIOS ERROR:", err.response?.data || err.message);
+                    setErrorMessage("Failed to start generation engine: " + (err.response?.data?.message || err.message));
+                    setStatus("error");
+                  }
+                }} 
+                className="h-12 px-8 bg-[#1E3A8A] hover:bg-blue-900 text-white shadow-lg shadow-blue-900/20 font-bold rounded-xl text-md transition-all active:scale-[0.98] group"
+              >
+                Generate Full Course Content <ChevronRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            )}
+
+            {/* PHASE 4: Currently Generating Full Content */}
+            {status === "generating" && (
+              <Button disabled className="h-12 px-8 bg-blue-100 text-blue-700 font-bold rounded-xl flex items-center gap-2">
+                <Loader2 size={18} className="animate-spin" /> Building Course...
+              </Button>
+            )}
+
+            {/* PHASE 5: Finished Generation -> Go to Course */}
+            {isFullyGenerated && (
+              <Button 
+                onClick={() => router.push(`/course/${extractedPreview._id}`)} 
+                className="h-12 px-8 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition-all"
+              >
+                Go to Course <ChevronRight size={18} className="ml-2" />
+              </Button>
+            )}
+          </div>
+
+>>>>>>> 453d276 (Initial clean commit)
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -484,7 +619,15 @@ onClick={async () => {
             </AnimatePresence>
           </div>
         </main>
+<<<<<<< HEAD
       </div>
     </div>
   );
 }
+=======
+        
+      </div>
+    </div>
+  );
+}
+>>>>>>> 453d276 (Initial clean commit)
