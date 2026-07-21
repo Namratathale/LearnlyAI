@@ -25,6 +25,9 @@ export default function CoursePlayer({ course }) {
   const [quizAnswers, setQuizAnswers] = useState({});
   const [quizResult, setQuizResult] = useState(null); // { passed, score, correctAnswers }
   const [isSubmittingQuiz, setIsSubmittingQuiz] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState("");
+  const [isBotTyping, setIsBotTyping] = useState(false);
 
   useEffect(() => {
     if (darkMode) document.documentElement.classList.add('dark');
@@ -181,6 +184,36 @@ useEffect(() => {
       console.error("Failed to save progress");
     }
     setLoading(false);
+  };
+
+  const handleSendMessage = async () => {
+    if (!chatInput.trim() || !currentLesson) return;
+
+    const userMessage = { role: "user", content: chatInput };
+    setChatMessages((prev) => [...prev, userMessage]);
+    setChatInput("");
+    setIsBotTyping(true);
+
+    try {
+      // Send the current lesson context to the backend so the AI knows what to talk about
+      const { data } = await API.post("/courses/chat", {
+        prompt: userMessage.content,
+        context: `The user is studying a lesson titled "${currentLesson.title}". Here is the lesson content: ${currentLesson.explanation}`
+      });
+
+      setChatMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: data.response },
+      ]);
+    } catch (error) {
+      console.error("Chat error:", error);
+      setChatMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "I'm sorry, I'm having trouble connecting to my neural net right now. Please try again!" },
+      ]);
+    } finally {
+      setIsBotTyping(false);
+    }
   };
 
   return (
@@ -461,6 +494,7 @@ useEffect(() => {
       </main>
 
       {/* 3. AI TUTOR WIDGET (Floating Right Panel) */}
+      {/* 3. AI TUTOR WIDGET (Floating Right Panel) */}
       <AnimatePresence>
         {tutorOpen && (
           <motion.div 
@@ -487,22 +521,54 @@ useEffect(() => {
             </div>
 
             {/* Chat History Area */}
-            <div className="flex-1 p-4 overflow-y-auto bg-slate-50/50 dark:bg-slate-900/50">
-              <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 rounded-2xl rounded-tl-sm shadow-sm max-w-[85%] mb-4">
+            <div className="flex-1 p-4 overflow-y-auto bg-slate-50/50 dark:bg-slate-900/50 flex flex-col gap-4">
+              {/* Initial Greeting */}
+              <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 rounded-2xl rounded-tl-sm shadow-sm max-w-[85%]">
                 <p className="text-sm text-slate-700 dark:text-slate-300">
                   Hi! I'm Zoiee. I can see you are currently on <strong>{currentLesson?.title || "the course dashboard"}</strong>. What would you like me to explain?
                 </p>
               </div>
+
+              {/* Dynamic Chat Messages */}
+              {chatMessages.map((msg, idx) => (
+                <div 
+                  key={idx} 
+                  className={`max-w-[85%] p-3 rounded-2xl shadow-sm text-sm ${
+                    msg.role === 'user' 
+                      ? 'bg-blue-600 text-white rounded-br-sm self-end' 
+                      : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-tl-sm self-start'
+                  }`}
+                >
+                  {msg.content}
+                </div>
+              ))}
+
+              {/* Typing Indicator */}
+              {isBotTyping && (
+                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 rounded-2xl rounded-tl-sm shadow-sm max-w-[85%] self-start flex gap-1">
+                  <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} className="w-2 h-2 bg-slate-400 rounded-full" />
+                  <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-2 h-2 bg-slate-400 rounded-full" />
+                  <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="w-2 h-2 bg-slate-400 rounded-full" />
+                </div>
+              )}
             </div>
 
             {/* Input Area */}
             <div className="p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
               <div className="relative flex items-center">
                 <input 
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                   className="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-full py-3 pl-5 pr-12 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 transition-all outline-none" 
-                  placeholder="Ask anything..." 
+                  placeholder={currentLesson ? "Ask about this lesson..." : "Select a lesson first"} 
+                  disabled={!currentLesson || isBotTyping}
                 />
-                <button className="absolute right-2 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors shadow-sm">
+                <button 
+                  onClick={handleSendMessage}
+                  disabled={!currentLesson || isBotTyping || !chatInput.trim()}
+                  className="absolute right-2 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50"
+                >
                   <Send size={14} className="ml-0.5" />
                 </button>
               </div>
