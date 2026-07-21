@@ -7,7 +7,6 @@ import crypto from 'crypto';
 import PDFParser from 'pdf2json';
 import { chunkText, generateCourseSkeleton , processLessonsInParallel} from '../services/aiEngine.js';
 import {User} from '../models/User.js';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import OpenAI from 'openai';
 
 const safeDecodeURI = (encodedStr) => {
