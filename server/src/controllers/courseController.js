@@ -502,20 +502,21 @@ export const getAnalytics = async (req, res) => {
 };
 
 /**
- * @desc    Chat with Zoiee AI Tutor via OpenAI
+ * @desc    Chat with Zoiee AI Tutor via Groq (Free & Fast)
  * @route   POST /api/courses/chat
  */
 export const chatWithZoiee = async (req, res) => {
   const { prompt, context } = req.body;
   
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY is missing from environment variables.");
+    if (!process.env.GROQ_API_KEY_BOT) {
+      throw new Error("GROQ_API_KEY_BOT is missing from environment variables.");
     }
 
-    // Initialize OpenAI
+    // Initialize OpenAI SDK, but point it to Groq's free servers!
     const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: process.env.GROQ_API_KEY_BOT,
+      baseURL: "https://api.groq.com/openai/v1", // <-- THIS IS THE MAGIC LINE
     });
 
     // Setup Zoiee's personality and the lesson context
@@ -530,14 +531,14 @@ export const chatWithZoiee = async (req, res) => {
       Answer the user's question directly, clearly, and concisely. Use Markdown formatting (bullet points, bold text) if it makes the answer easier to read. Keep a warm, tutor-like tone.
     `;
 
-    // Make the API call to OpenAI
+    // Make the API call to Groq
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // Fast, smart, and cost-effective
+      model: "llama-3.3-70b-versatile", // Powerful, free Meta model
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: prompt }
       ],
-      temperature: 0.7, // Gives her a bit of creative warmth
+      temperature: 0.7, 
     });
 
     const responseText = response.choices[0].message.content;
@@ -545,7 +546,7 @@ export const chatWithZoiee = async (req, res) => {
     return res.status(200).json({ response: responseText });
 
   } catch (error) {
-    console.error('Zoiee OpenAI Error:', error.message);
+    console.error('Zoiee Groq Error:', error.message);
     return res.status(500).json({ message: 'Failed to generate AI response' });
   }
 };
