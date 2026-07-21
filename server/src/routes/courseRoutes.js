@@ -25,7 +25,7 @@ router.get('/notes/:courseId/:lessonId', getNote);
 router.post('/notes', saveNote); 
 router.get('/progress/:courseId', getCourseProgress);
 router.post('/submit-quiz', submitQuiz);
-
+router.post('/chat', chatWithZoiee);
 // ==========================================
 //  ANALYTICS ROUTES
 // ==========================================
