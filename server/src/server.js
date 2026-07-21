@@ -23,11 +23,11 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 // Bootstrap Server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
 console.log("Registered routes checking...");
 const startServer = async () => {
   await connectDB();
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0',() => {
     console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
   });
 };
