@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Mail, Lock } from "lucide-react";
-import { useGoogleLogin } from "@react-oauth/google"; // <-- New Import
+// 1. Import the GoogleOAuthProvider here
+import { useGoogleLogin, GoogleOAuthProvider } from "@react-oauth/google"; 
 import API from "@/lib/api";
 
 import { Button } from "@/components/ui/button";
@@ -14,14 +15,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import AnimatedBackground from "@/components/AnimatedBackground";
 
-export default function Login() {
+// 2. Rename your main component to a sub-component (e.g., LoginContent)
+function LoginContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
 
-  // Standard Email/Password Login
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -39,7 +40,6 @@ export default function Login() {
     }
   };
 
-  // Google OAuth Logic
   const loginWithGoogle = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
@@ -57,28 +57,23 @@ export default function Login() {
     onError: () => setError("Google login pop-up was closed or failed.")
   });
 
-  // Master OAuth Trigger
   const triggerOAuth = (provider) => {
     if (provider === 'Google') {
       loginWithGoogle();
     } else if (provider === 'GitHub') {
-      // Redirects to GitHub authorization server
       window.location.href = `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID}&redirect_uri=http://localhost:3000/auth/github/callback&scope=user:email`;
     }
   };
 
   return (
     <div className="h-screen w-full bg-background flex items-center justify-center px-4 relative overflow-hidden font-sans">
-      
       <AnimatedBackground />
-
       <motion.div 
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
         className="w-full max-w-md relative z-10"
       >
-        {/* Adjusted padding to eliminate scrolling requirements */}
         <Card className="border-surface-light bg-surface shadow-[0_15px_40px_rgba(0,0,0,0.06)] rounded-2xl p-1">
           <CardHeader className="text-center pb-4">
             <CardTitle className="font-heading text-3xl text-primary tracking-wide mb-1">
@@ -177,5 +172,14 @@ export default function Login() {
         </Card>
       </motion.div>
     </div>
+  );
+}
+
+// 3. Create a new default export that wraps your logic in the Provider
+export default function Login() {
+  return (
+    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+      <LoginContent />
+    </GoogleOAuthProvider>
   );
 }
