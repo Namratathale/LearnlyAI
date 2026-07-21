@@ -8,6 +8,7 @@ import PDFParser from 'pdf2json';
 import { chunkText, generateCourseSkeleton , processLessonsInParallel} from '../services/aiEngine.js';
 import {User} from '../models/User.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import OpenAI from 'openai';
 
 const safeDecodeURI = (encodedStr) => {
   try {
@@ -501,20 +502,24 @@ export const getAnalytics = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Chat with Zoiee AI Tutor via OpenAI
+ * @route   POST /api/courses/chat
+ */
 export const chatWithZoiee = async (req, res) => {
   const { prompt, context } = req.body;
   
   try {
-    if (!process.env.GEMINI_API_KEY_BOT) {
-      throw new Error("GEMINI_API_KEY_BOT is missing from environment variables.");
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY is missing from environment variables.");
     }
 
-    // Initialize Gemini
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY_BOT);
-    // Using gemini-1.5-flash as it is extremely fast and perfect for chat
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // Initialize OpenAI
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
 
-    // Give Zoiee her personality and context
+    // Setup Zoiee's personality and the lesson context
     const systemPrompt = `
       You are Zoiee, a friendly, encouraging, and highly knowledgeable AI learning assistant for the Learnly AI platform.
       
@@ -523,18 +528,25 @@ export const chatWithZoiee = async (req, res) => {
       ${context}
       ---
       
-      Answer the user's question directly, clearly, and concisely. Use formatting (bullet points, bold text) if it makes the answer easier to read. Keep a warm, tutor-like tone.
-      
-      User's question: ${prompt}
+      Answer the user's question directly, clearly, and concisely. Use Markdown formatting (bullet points, bold text) if it makes the answer easier to read. Keep a warm, tutor-like tone.
     `;
 
-    const result = await model.generateContent(systemPrompt);
-    const responseText = result.response.text();
+    // Make the API call to OpenAI
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini", // Fast, smart, and cost-effective
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.7, // Gives her a bit of creative warmth
+    });
+
+    const responseText = response.choices[0].message.content;
 
     return res.status(200).json({ response: responseText });
 
   } catch (error) {
-    console.error('Zoiee API Error:', error.message);
+    console.error('Zoiee OpenAI Error:', error.message);
     return res.status(500).json({ message: 'Failed to generate AI response' });
   }
 };
