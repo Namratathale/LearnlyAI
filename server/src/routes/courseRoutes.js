@@ -5,6 +5,7 @@ import {
   getCourseProgress, submitQuiz, getAnalytics, updateProfile
 } from '../controllers/courseController.js';
 import { protect } from '../middleware/authMiddleware.js';
+import { chatWithZoiee } from '../controllers/courseController.js';
 
 const router = express.Router();
 

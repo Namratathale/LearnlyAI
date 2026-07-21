@@ -7,7 +7,8 @@ import crypto from 'crypto';
 import PDFParser from 'pdf2json';
 import { chunkText, generateCourseSkeleton , processLessonsInParallel} from '../services/aiEngine.js';
 import {User} from '../models/User.js';
-// Helper to safely decode text that might contain stray '%' symbols
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
 const safeDecodeURI = (encodedStr) => {
   try {
     return decodeURIComponent(encodedStr);
@@ -497,5 +498,43 @@ export const getAnalytics = async (req, res) => {
   } catch (error) {
     console.error("Analytics Error:", error);
     res.status(500).json({ message: 'Failed to fetch analytics' });
+  }
+};
+
+export const chatWithZoiee = async (req, res) => {
+  const { prompt, context } = req.body;
+  
+  try {
+    if (!process.env.GEMINI_API_KEY_BOT) {
+      throw new Error("GEMINI_API_KEY_BOT is missing from environment variables.");
+    }
+
+    // Initialize Gemini
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY_BOT);
+    // Using gemini-1.5-flash as it is extremely fast and perfect for chat
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    // Give Zoiee her personality and context
+    const systemPrompt = `
+      You are Zoiee, a friendly, encouraging, and highly knowledgeable AI learning assistant for the Learnly AI platform.
+      
+      Here is the content of the lesson the user is currently looking at:
+      ---
+      ${context}
+      ---
+      
+      Answer the user's question directly, clearly, and concisely. Use formatting (bullet points, bold text) if it makes the answer easier to read. Keep a warm, tutor-like tone.
+      
+      User's question: ${prompt}
+    `;
+
+    const result = await model.generateContent(systemPrompt);
+    const responseText = result.response.text();
+
+    return res.status(200).json({ response: responseText });
+
+  } catch (error) {
+    console.error('Zoiee API Error:', error.message);
+    return res.status(500).json({ message: 'Failed to generate AI response' });
   }
 };
