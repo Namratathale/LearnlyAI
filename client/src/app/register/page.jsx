@@ -81,6 +81,15 @@ export default function Register() {
     }
   };
 
+  const triggerOAuth = (provider) => {
+    if (provider === 'Google') {
+      loginWithGoogle();
+    } else if (provider === 'GitHub') {
+      const redirectUri = `${window.location.origin}/auth/github/callback`;
+      window.location.href = `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID}&redirect_uri=${redirectUri}&scope=user:email`;
+    }
+  };
+
   return (
     <div className="h-screen w-full bg-background flex items-center justify-center px-4 relative overflow-hidden font-sans">
       
