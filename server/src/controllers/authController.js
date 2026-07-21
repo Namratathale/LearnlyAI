@@ -93,7 +93,8 @@ export const githubAuth = async (req, res) => {
       {
         client_id: process.env.GITHUB_CLIENT_ID,
         client_secret: process.env.GITHUB_CLIENT_SECRET,
-        code,
+        code: req.body.code,
+        redirect_uri: 'https://learnly-ai-mauve.vercel.app/auth/github/callback',
       },
       { headers: { Accept: 'application/json' } }
     );
