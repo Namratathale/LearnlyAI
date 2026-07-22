@@ -1,7 +1,9 @@
-import { Resend } from 'resend';
+import { BrevoClient } from '@getbrevo/brevo';
 
-// Initialize Resend with your API key from environment variables
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Brevo API client with your API key
+const brevo = new BrevoClient({
+  apiKey: process.env.BREVO_API_KEY,
+});
 
 export const sendOTPEmail = async (email, name, otp) => {
   const htmlTemplate = `
@@ -40,15 +42,18 @@ export const sendOTPEmail = async (email, name, otp) => {
   `;
 
   try {
-    await resend.emails.send({
-      from: 'AI Learning Platform <onboarding@resend.dev>', // Resend's default test sender domain
-      to: email,
+    await brevo.transactionalEmails.sendTransacEmail({
+      sender: { 
+        name: 'AI Learning Platform', 
+        email: process.env.BREVO_SENDER_EMAIL // Must be the email you verified in Step 2
+      },
+      to: [{ email: email, name: name }],
       subject: `${otp} is your verification code`,
-      html: htmlTemplate,
+      htmlContent: htmlTemplate,
     });
-    console.log(`[Resend] OTP email successfully sent to ${email}`);
+    console.log(`[Brevo] OTP email successfully sent to ${email}`);
   } catch (error) {
-    console.error('[Resend Error]:', error);
+    console.error('[Brevo Error]:', error);
     throw new Error('Failed to send verification email.');
   }
 };
