@@ -133,3 +133,21 @@ export const githubAuth = async (req, res) => {
     return res.status(401).json({ status: 'fail', message: 'GitHub authentication failed.' });
   }
 };
+
+export const registerStep1 = async (req, res) => {
+  try {
+    // ... your registration logic ...
+    await sendOTPEmail(email, name, otp);
+    
+    return res.status(200).json({ message: "OTP sent successfully" });
+  } catch (error) {
+    // THIS FORCES THE ERROR TO SHOW UP CLEARLY ON RENDER:
+    console.error("🔥 REGISTER STEP 1 ERROR:", error.message);
+    console.error(error.stack);
+    
+    return res.status(500).json({ 
+      message: "Internal server error", 
+      error: error.message // Sends the actual error to your browser console temporarily
+    });
+  }
+};
