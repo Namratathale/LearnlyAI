@@ -1,3 +1,7 @@
+import dns from 'dns';
+
+dns.setDefaultResultOrder('ipv4first');
+
 import nodemailer from 'nodemailer';
 
 /**
@@ -9,9 +13,17 @@ export const sendOTPEmail = async (email, name, otp) => {
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || '587'),
     secure: false, 
+    // It forces the socket to use IPv4 (family: 4) instead of IPv6 (family: 6)
+    tls: {
+      servername: 'smtp.gmail.com', //
+  },
+
+  // If Nodemailer still acts up, you can explicitly pass the IP family to the underlying socket:
+    
     auth: {
       user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS, // Note: Nodemailer looks for 'pass', not 'password'
+      pass: process.env.SMTP_PASS,
+      socketTimeout: 20000, // 20 seconds
     },
   });
 
