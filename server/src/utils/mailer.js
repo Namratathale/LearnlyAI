@@ -4,26 +4,19 @@ dns.setDefaultResultOrder('ipv4first');
 
 import nodemailer from 'nodemailer';
 
-/**
- * Transmits a premium HTML verification message to the student
- */
 export const sendOTPEmail = async (email, name, otp) => {
-  // Initialize transporter inside the function so environment variables are guaranteed to be loaded
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false, 
-    // It forces the socket to use IPv4 (family: 4) instead of IPv6 (family: 6)
+    port: parseInt(process.env.SMTP_PORT || 465),
+    secure: true, // true for 465, false for other ports
     tls: {
-      servername: 'smtp.gmail.com', //
+      servername: 'smtp.gmail.com',
   },
-
-  // If Nodemailer still acts up, you can explicitly pass the IP family to the underlying socket:
-    
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
-      socketTimeout: 20000, // 20 seconds
+      socketTimeout: 10000, 
+      family: 4,
     },
   });
 
