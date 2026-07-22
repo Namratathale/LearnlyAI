@@ -135,19 +135,54 @@ export const githubAuth = async (req, res) => {
 };
 
 export const registerStep1 = async (req, res) => {
+  const { name, email, password } = req.body;
+  
   try {
-    // ... your registration logic ...
+    if (!name || !email || !password) {
+      return res.status(400).json({ status: 'fail', message: 'Please provide name, email, and password.' });
+    }
+
+    // Check if user already exists
+    let existingUser = await User.findOne({ email });
+    if (existingUser && existingUser.isVerified) {
+      return res.status(400).json({ status: 'fail', message: 'User already exists and is verified.' });
+    }
+
+    // Generate a secure 6-digit OTP code
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // Valid for 10 minutes
+
+    // Create or update temporary unverified user record
+    if (existingUser) {
+      existingUser.name = name;
+      existingUser.password = password; 
+      existingUser.otp = otp;
+      existingUser.otpExpires = otpExpires;
+      await existingUser.save();
+    } else {
+      await User.create({
+        name,
+        email,
+        password,
+        otp,
+        otpExpires,
+        isVerified: false,
+      });
+    }
+
+    // Dispatch the email using your transporter
     await sendOTPEmail(email, name, otp);
     
-    return res.status(200).json({ message: "OTP sent successfully" });
+    return res.status(200).json({ status: 'success', message: "OTP sent successfully" });
+
   } catch (error) {
-    // THIS FORCES THE ERROR TO SHOW UP CLEARLY ON RENDER:
     console.error("🔥 REGISTER STEP 1 ERROR:", error.message);
     console.error(error.stack);
     
     return res.status(500).json({ 
+      status: 'error',
       message: "Internal server error", 
-      error: error.message // Sends the actual error to your browser console temporarily
+      error: error.message 
     });
   }
 };
