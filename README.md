@@ -19,9 +19,9 @@ The platform automatically converts raw study materials such as PDFs into struct
 * **Personalized User Dashboard:** Centralized control center to manage profiles, view enrolled courses, and track academic history.
 
 ## Tech Stack
-* **Frontend:** Next.js (App Router), React, Tailwind CSS, Framer Motion, Lucide React, Axios[cite: 1].
-* **Backend:** Node.js, Express, Mongoose, JWT, Brevo API.
-* **Database:** MongoDB.
+* **Frontend:** Next.js (App Router), React, Tailwind CSS, Framer Motion, Lucide React, Axios.
+* **Backend:** Node.js, Express, Mongoose, JWT, Brevo API(for mail), DOKER
+* **Database:** MongoDB, AWS
 
 ## Getting Started
 
