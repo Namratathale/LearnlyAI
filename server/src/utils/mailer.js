@@ -1,34 +1,9 @@
-import dns from 'dns';
+import { Resend } from 'resend';
 
-// FORCE IPv4 ONLY: Intercepts Node's DNS lookup so it never returns an IPv6 address on Render
-const originalLookup = dns.lookup;
-dns.lookup = (hostname, options, callback) => {
-  if (typeof options === 'function') {
-    callback = options;
-    options = {};
-  }
-  options.family = 4; // Force IPv4 family
-  return originalLookup(hostname, options, callback);
-};
-
-import nodemailer from 'nodemailer';
+// Initialize Resend with your API key from environment variables
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendOTPEmail = async (email, name, otp) => {
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT || 465),
-    secure: true,
-    family: 4, 
-    socketTimeout: 10000,
-    tls: {
-      servername: 'smtp.gmail.com',
-    },
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
-
   const htmlTemplate = `
     <!DOCTYPE html>
     <html>
@@ -64,10 +39,16 @@ export const sendOTPEmail = async (email, name, otp) => {
     </html>
   `;
 
-  await transporter.sendMail({
-    from: `"AI Learning Platform" <${process.env.SMTP_USER}>`,
-    to: email,
-    subject: `${otp} is your verification code`,
-    html: htmlTemplate,
-  });
+  try {
+    await resend.emails.send({
+      from: 'AI Learning Platform <onboarding@resend.dev>', // Resend's default test sender domain
+      to: email,
+      subject: `${otp} is your verification code`,
+      html: htmlTemplate,
+    });
+    console.log(`[Resend] OTP email successfully sent to ${email}`);
+  } catch (error) {
+    console.error('[Resend Error]:', error);
+    throw new Error('Failed to send verification email.');
+  }
 };

@@ -27,7 +27,8 @@
     "multer": "^2.2.0",
     "nodemailer": "^9.0.3",
     "openai": "^6.48.0",
-    "pdf2json": "^4.0.3"
+    "pdf2json": "^4.0.3",
+    "resend": "^6.18.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
