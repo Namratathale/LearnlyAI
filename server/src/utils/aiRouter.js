@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const delay = (ms) => new Promise(res => setTimeout(res, ms));
 
 export const generateStructuredContent = async (systemPrompt, userPrompt, retries = 2) => {
-  if (!process.env.GROQ_API_KEY || !process.env.GEMINI_API_KEY) {
+  if (!process.env.GROQ_API_KEY && !process.env.GEMINI_API_KEY) {
     throw new Error("AI API Keys are missing.");
   }
   
